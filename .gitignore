@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.log
+
+# Build
+dist/
+build/
+
+# Trae
+.trae/
+.trae-html-share-packages/
+
+# 交付包（不纳入版本控制）
+医院蓝多设备适配_测试交付包/
+医院蓝多设备适配_测试交付包.zip
+
+# 文档与作业（课程作业相关，按需提交）
+*.docx
+*.doc
+*.pdf
+*.zip
