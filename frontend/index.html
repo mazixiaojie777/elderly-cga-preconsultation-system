@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>老年预问诊与综合评估</title>
+  <link rel="stylesheet" href="./hospital-blue.css" />
+  <style>
+    /* 页面级局部样式 */
+    .home-hero {
+      border-left: 4px solid var(--primary);
+      padding-left: 1rem;
+    }
+    .home-entry {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1.5rem;
+    }
+    .home-entry__icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      color: var(--primary);
+    }
+    .steps-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .steps-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .step-badge {
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      background: var(--surface);
+      font-weight: 600;
+      color: var(--primary-hover);
+      flex-shrink: 0;
+    }
+    @media (min-width: 640px) {
+      .steps-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="cga-screen" style="min-height:100dvh;">
+    <!-- 顶部导航条 -->
+    <header class="cga-topbar">
+      <div class="cga-topbar__inner">
+        <svg class="home-entry__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+          <rect x="9" y="3" width="6" height="4" rx="1" />
+        </svg>
+        <span class="cga-topbar__title">老年综合评估服务</span>
+      </div>
+    </header>
+
+    <!-- 主体内容 -->
+    <div style="max-width:72rem;margin:0 auto;padding:1.75rem 1.25rem;">
+      <section class="home-hero" style="margin-bottom:1.5rem;">
+        <h1 style="font-size:clamp(1.75rem,4vw,3.25rem);line-height:1.2;">老年预问诊与综合评估</h1>
+        <p style="margin-top:0.75rem;max-width:34em;font-size:1.125rem;color:var(--foreground-muted);">
+          患者和医院职工请选择对应入口。
+        </p>
+      </section>
+
+      <!-- 双入口卡片 -->
+      <section class="cga-grid cga-grid--cols-2" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);">
+        <div class="cga-card home-entry">
+          <svg class="home-entry__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+          </svg>
+          <h2 style="font-size:1.5rem;">患者入口</h2>
+          <p style="font-size:1.125rem;color:var(--foreground-muted);">
+            核验身份，查看和填写您的评估任务。
+          </p>
+          <a href="./patient-verify.html" class="cga-touch-link cga-btn--primary" style="margin-top:auto;width:100%;justify-content:space-between;">
+            进入患者端
+            <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="cga-card home-entry">
+          <svg class="home-entry__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path d="M8 2v4M16 2v4M3 10h18" />
+          </svg>
+          <h2 style="font-size:1.5rem;">医院职工入口</h2>
+          <p style="font-size:1.125rem;color:var(--foreground-muted);">
+            使用工号登录，查看评估任务及量表。
+          </p>
+          <a href="#" class="cga-touch-link cga-btn--outline" style="margin-top:auto;width:100%;justify-content:space-between;">
+            进入职工端
+            <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- 评估步骤说明 -->
+      <section class="cga-card cga-card--muted" style="margin-top:1.5rem;">
+        <h2 id="assessment-steps" style="font-size:1.125rem;margin-bottom:0.75rem;">患者评估步骤</h2>
+        <ol class="steps-list" style="list-style:none;padding:0;margin:0;">
+          <li><span class="step-badge">1</span><span>核验身份</span></li>
+          <li><span class="step-badge">2</span><span>填写评估</span></li>
+          <li><span class="step-badge">3</span><span>医护核验</span></li>
+        </ol>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

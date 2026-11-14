@@ -1,0 +1,381 @@
+/* ============================================================================
+ * 老年综合评估（CGA）预问诊系统 — 医院蓝多设备适配设计系统
+ *
+ * 来源：医院蓝多设备适配测试交付包 v1.0
+ * 适用：老年综合评估预问诊前端
+ * 设计原则：
+ *   1. 主色采用医院蓝（#1856a3），符合医疗机构视觉规范
+ *   2. 全设备响应式：手机单列 → 平板/电脑按宽度展开 → 自助机触控放大
+ *   3. 自助机模式（宽度 ≥1000px 且主要指针为触控）下，关键触控目标 ≥60px
+ *   4. 使用系统中文字体，移除 Google Fonts 外链，消除网络依赖
+ * ========================================================================== */
+
+:root {
+  /* —— 背景色 —— */
+  --background: #f3f7fc;
+  --surface: #ffffff;
+  --surface-secondary: #eaf2fc;
+
+  /* —— 文本色 —— */
+  --foreground: #142843;
+  --foreground-muted: #465b75;
+  --foreground-placeholder: #596d87;
+
+  /* —— 边框色 —— */
+  --border: #ccd9eb;
+  --field-border: #8198b5;
+
+  /* —— 功能色 —— */
+  --primary: #1856a3;
+  --primary-hover: #123c78;
+  --primary-tint: #deebfd;
+
+  --success: #52c41a;
+  --warning: #faad14;
+  --danger: #d95a4a;
+  --info: #5b8def;
+
+  /* —— 字体 —— */
+  --font-serif: 'Songti SC', SimSun, Georgia, serif;
+  --font-sans: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui,
+    sans-serif;
+}
+
+/* ============================================================================
+ * 全局基础样式
+ * ========================================================================== */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+  font-weight: 600;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--primary-hover);
+  text-decoration: none;
+}
+
+/* ============================================================================
+ * 核心布局类（.cga-screen 为顶层容器）
+ * ========================================================================== */
+
+.cga-screen {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.cga-screen h1,
+.cga-screen h2 {
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.cga-screen :focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* 交互内容区，在大屏幕下约束宽度 */
+.cga-interaction {
+  width: 100%;
+}
+
+/* ============================================================================
+ * 表单控件（.cga-field）
+ * ========================================================================== */
+
+.cga-field {
+  width: 100%;
+  min-height: 3rem;          /* 48px */
+  border: 1px solid var(--field-border);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.cga-field::placeholder {
+  color: var(--foreground-placeholder);
+}
+
+.cga-field:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+}
+
+/* ============================================================================
+ * 按钮系统
+ * ========================================================================== */
+
+.cga-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter 160ms ease, transform 160ms ease,
+    background-color 160ms ease;
+  text-decoration: none;
+}
+
+.cga-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主按钮 */
+.cga-btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.cga-btn--primary:not(:disabled):hover {
+  background: var(--primary-hover);
+}
+
+/* 次要按钮（描边） */
+.cga-btn--outline {
+  background: transparent;
+  color: var(--primary-hover);
+  border-color: var(--primary);
+}
+
+.cga-btn--outline:not(:disabled):hover {
+  background: var(--primary-tint);
+}
+
+/* 危险按钮 */
+.cga-btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* 链接型触控目标 */
+.cga-touch-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ============================================================================
+ * 卡片容器
+ * ========================================================================== */
+
+.cga-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.cga-card--muted {
+  background: var(--surface-secondary);
+}
+
+/* ============================================================================
+ * 提示与状态
+ * ========================================================================== */
+
+.cga-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid;
+}
+
+.cga-alert--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.cga-alert--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.cga-alert--info {
+  background: var(--primary-tint);
+  border-color: #bfdbfe;
+  color: var(--primary-hover);
+}
+
+/* 加载中状态 */
+.cga-loading {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: cga-spin 0.75s linear infinite;
+}
+
+@keyframes cga-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+ * 顶部导航条
+ * ========================================================================== */
+
+.cga-topbar {
+  background: var(--primary-hover);
+  color: #fff;
+}
+
+.cga-topbar__inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.cga-topbar__title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ============================================================================
+ * 多设备响应式断点
+ *   - 手机：< 640px 单列
+ *   - 平板：≥ 640px
+ *   - 电脑：≥ 1024px
+ * ========================================================================== */
+
+/* 手机（默认）单列 */
+.cga-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+/* 平板及以上：双列 */
+@media (min-width: 640px) {
+  .cga-grid--cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 电脑及以上：三列 */
+@media (min-width: 1024px) {
+  .cga-grid--cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================================
+ * 自助机/大触屏模式
+ *   触发条件：视口宽度 ≥ 1000px 且主要指针为粗略指针（触控）
+ *   效果：关键按钮与输入框高度提升至 60px，字号放大至 1.125rem
+ * ========================================================================== */
+
+@media (min-width: 1000px) and (pointer: coarse) {
+  .cga-screen .cga-interaction {
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+
+  .cga-screen :is(button, .cga-field, .cga-touch-link, .cga-btn) {
+    min-height: 3.75rem;        /* 60px 触控目标 */
+  }
+
+  .cga-screen :is(button, .cga-field, .cga-touch-link, .cga-btn, label) {
+    font-size: 1.125rem;          /* 18px */
+  }
+}
+
+/* ============================================================================
+ * 表格响应式（窄屏转卡片式展示）
+ * ========================================================================== */
+
+.cga-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.cga-table th,
+.cga-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cga-table thead th {
+  background: var(--surface-secondary);
+  font-weight: 600;
+}
+
+/* 窄屏：表格转卡片布局 */
+@media (max-width: 767px) {
+  .cga-table--responsive thead {
+    display: none;
+  }
+
+  .cga-table--responsive tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem;
+  }
+
+  .cga-table--responsive tbody td {
+    border: none;
+    padding: 0.25rem 0;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  .cga-table--responsive tbody td::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+    color: var(--foreground-muted);
+  }
+}

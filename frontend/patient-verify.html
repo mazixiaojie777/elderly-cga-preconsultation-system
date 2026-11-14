@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>患者身份核验 · 老年综合评估</title>
+  <link rel="stylesheet" href="./hospital-blue.css" />
+  <style>
+    .page-hero {
+      border-left: 4px solid var(--primary);
+      padding-left: 1rem;
+    }
+    .seg-btn[aria-pressed="true"] {
+      border-color: var(--primary);
+      background: var(--primary-tint);
+      color: var(--primary-hover);
+    }
+    .seg-btn {
+      min-height: 3rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .field-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .field-label span { display: block; margin-bottom: 0.5rem; }
+
+    /* 扫码令牌区域 */
+    .scan-section {
+      margin-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .scan-toggle {
+      min-height: 2.75rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--foreground);
+      width: 100%;
+      text-align: left;
+    }
+    .scan-toggle:hover { background: var(--surface-secondary); }
+    .scan-form {
+      margin-top: 0.75rem;
+      padding: 1rem;
+      background: var(--surface-secondary);
+      border-radius: 0.5rem;
+      display: none;
+    }
+    .scan-form.open { display: block; }
+
+    /* 联调演示身份（仅开发环境显示） */
+    .dev-demo {
+      margin-top: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .dev-demo summary {
+      min-height: 2.75rem;
+      cursor: pointer;
+      color: var(--primary-hover);
+      font-weight: 500;
+    }
+    .dev-demo[open] summary { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <main class="cga-screen" style="min-height:100dvh;padding:1.5rem 1.25rem;">
+    <div class="cga-interaction" style="max-width:36rem;margin:0 auto;">
+      <a href="./index.html" class="cga-touch-link" style="min-height:2.75rem;color:var(--primary-hover);text-decoration:underline;text-underline-offset:4px;">
+        ← 返回身份选择
+      </a>
+
+      <header class="page-hero" style="margin-top:1rem;margin-bottom:1.5rem;">
+        <p style="color:var(--foreground-muted);">患者服务</p>
+        <h1 style="font-size:1.875rem;">患者身份核验</h1>
+        <p style="margin-top:0.5rem;font-size:1.125rem;color:var(--foreground-muted);">
+          这是演示环境。请填入示例任务，体验患者流程。
+        </p>
+      </header>
+
+      <section class="cga-card">
+        <form id="verifyForm" class="cga-grid" style="gap:1.25rem;">
+          <!-- 填写人选择 -->
+          <fieldset style="border:none;padding:0;margin:0;">
+            <legend style="font-weight:600;margin-bottom:0.5rem;">由谁填写</legend>
+            <div class="cga-grid cga-grid--cols-2" style="gap:0.5rem;">
+              <button type="button" class="seg-btn" data-role="patient" aria-pressed="true">患者本人</button>
+              <button type="button" class="seg-btn" data-role="family" aria-pressed="false">家属协助</button>
+            </div>
+          </fieldset>
+
+          <!-- 任务编号 -->
+          <label class="field-label">
+            <span>任务编号</span>
+            <input id="taskNo" class="cga-field" name="taskNo" placeholder="例如 T2026080002" required />
+          </label>
+
+          <!-- 证件号后四位 -->
+          <label class="field-label">
+            <span>证件号后四位</span>
+            <input id="idCardNo" class="cga-field" name="idCardNo" inputmode="numeric" maxlength="4" placeholder="请输入后四位" required />
+          </label>
+
+          <!-- 家属关系（仅家属协助时显示） -->
+          <label class="field-label" id="relationshipField" style="display:none;">
+            <span>与患者关系</span>
+            <select id="relationship" class="cga-field" name="relationship">
+              <option>女儿</option>
+              <option>儿子</option>
+              <option>配偶</option>
+              <option>其他家属</option>
+            </select>
+          </label>
+
+          <!-- 错误提示 -->
+          <div id="errorBox" class="cga-alert cga-alert--error" style="display:none;" role="alert"></div>
+
+          <!-- 提交按钮 -->
+          <button type="submit" id="submitBtn" class="cga-btn cga-btn--primary" style="width:100%;min-height:3.25rem;">
+            <span id="submitText">核验并进入</span>
+          </button>
+        </form>
+
+        <!-- 演示信息快捷填入（Mock 模式） -->
+        <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <p style="font-weight:500;margin-bottom:0.5rem;">填入演示信息</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+            <button type="button" class="cga-btn cga-btn--outline" data-demo="form" style="min-height:2.75rem;">传统问卷任务</button>
+            <button type="button" class="cga-btn cga-btn--outline" data-demo="ai" style="min-height:2.75rem;">AI 对话任务</button>
+          </div>
+        </div>
+
+        <!-- 联调演示身份（仅开发环境显示） -->
+        <details class="dev-demo" id="devDemo" style="display:none;">
+          <summary>联调演示身份</summary>
+          <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;" id="devDemoAccounts"></div>
+        </details>
+
+        <!-- 扫码令牌核验 -->
+        <div class="scan-section">
+          <button type="button" class="scan-toggle" id="scanToggle" aria-expanded="false">
+            使用扫码令牌
+          </button>
+          <form id="scanForm" class="scan-form" onsubmit="return false;">
+            <label class="field-label">
+              <span>院内一次性令牌</span>
+              <input id="scanToken" class="cga-field" name="scanToken" minlength="24" placeholder="请粘贴二维码中的令牌" required />
+            </label>
+            <p style="font-size:0.875rem;color:var(--foreground-muted);margin:0.5rem 0;">
+              请粘贴二维码中的令牌。过期后可请护士重新生成。
+            </p>
+            <button type="submit" id="scanSubmitBtn" class="cga-btn cga-btn--primary" style="min-height:2.75rem;width:100%;">
+              <span id="scanSubmitText">核验扫码令牌</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <p style="margin-top:1rem;color:var(--foreground-muted);">
+        需要帮助时，可请现场工作人员协助。
+      </p>
+    </div>
+  </main>
+
+  <script>
+    /* ============================================================
+     * 患者身份核验页面逻辑
+     * 对接后端接口：
+     *   - POST /api/session/start        （AGENT.md 8.1 契约）
+     *   - POST /api/session/verify-token （扫码令牌核验，医院蓝适配新增）
+     * ============================================================ */
+
+    // —— 运行时配置 ——
+    // 后端 API 基础地址（遵循项目惯例：集中定义常量）
+    // 可通过 window.__API_BASE__ 覆盖（便于测试注入）
+    const API_BASE = window.__API_BASE__ || 'http://127.0.0.1:8766';
+    // 前端会话数据获取必须设置超时，超时后降级（项目硬性约束）
+    const REQUEST_TIMEOUT_MS = 5000;
+
+    // 运行模式：mock（演示）或 api（联调）。演示环境默认 mock。
+    const DATA_MODE = window.__DATA_MODE__ || 'mock';
+    const IS_DEV = window.__IS_DEV__ || (location.hostname === '127.0.0.1' || location.hostname === 'localhost');
+
+    // —— 演示账号数据 ——
+    const DEMO_ACCOUNTS = {
+      form: { taskNo: 'T2026080002', idCardNo: '5678' },
+      ai:   { taskNo: 'T2026080001', idCardNo: '1234' },
+    };
+
+    // 联调演示身份（仅开发环境显示）
+    const DEV_DEMO_ACCOUNTS = [
+      { name: '王秀兰', idCardNo: '110101194501011234', phone: '13800138000' },
+      { name: '李建国', idCardNo: '110101194203034567', phone: '13900139000' },
+      { name: '张桂英', idCardNo: '110101194805057890', phone: '13700137000' },
+    ];
+
+    // —— DOM 引用 ——
+    const form = document.getElementById('verifyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const errorBox = document.getElementById('errorBox');
+    const relationshipField = document.getElementById('relationshipField');
+    const scanToggle = document.getElementById('scanToggle');
+    const scanForm = document.getElementById('scanForm');
+    const scanSubmitBtn = document.getElementById('scanSubmitBtn');
+    const scanSubmitText = document.getElementById('scanSubmitText');
+    let participantType = 'patient';
+
+    // —— 开发环境显示联调演示身份 ——
+    if (IS_DEV) {
+      const devDemo = document.getElementById('devDemo');
+      devDemo.style.display = 'block';
+      const container = document.getElementById('devDemoAccounts');
+      DEV_DEMO_ACCOUNTS.forEach((account) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cga-btn cga-btn--outline';
+        btn.style.minHeight = '2.75rem';
+        btn.textContent = `填充${account.name}`;
+        btn.addEventListener('click', () => {
+          document.getElementById('idCardNo').value = account.idCardNo;
+          // API 模式下还可填入手机号，此处保留 idCardNo 用于演示
+          hideError();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    // —— 填写人切换 ——
+    document.querySelectorAll('.seg-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.seg-btn').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        participantType = btn.dataset.role;
+        relationshipField.style.display = participantType === 'family' ? 'block' : 'none';
+      });
+    });
+
+    // —— 演示信息快捷填入 ——
+    document.querySelectorAll('[data-demo]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const demo = DEMO_ACCOUNTS[btn.dataset.demo];
+        document.getElementById('taskNo').value = demo.taskNo;
+        document.getElementById('idCardNo').value = demo.idCardNo;
+        hideError();
+      });
+    });
+
+    // —— 扫码令牌区域展开/收起 ——
+    scanToggle.addEventListener('click', () => {
+      const isOpen = scanForm.classList.toggle('open');
+      scanToggle.setAttribute('aria-expanded', String(isOpen));
+      scanToggle.textContent = isOpen ? '收起扫码核验' : '使用扫码令牌';
+      if (!isOpen) {
+        document.getElementById('scanToken').value = '';
+        hideError();
+      }
+    });
+
+    // —— 扫码令牌核验表单提交 ——
+    scanForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+      setScanLoading(true);
+
+      const token = document.getElementById('scanToken').value.trim();
+      if (token.length < 24) {
+        showError('令牌长度不足，请检查二维码内容');
+        setScanLoading(false);
+        return;
+      }
+
+      try {
+        const result = await verifyScanToken(token);
+        if (result.valid) {
+          console.log(`[LANTAO] 扫码令牌核验成功，session_id=${result.session_id}`);
+          showSuccess(`核验成功！会话：${result.session_id}`);
+        } else {
+          showError(result.message || '令牌核验失败');
+        }
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        setScanLoading(false);
+      }
+    });
+
+    /**
+     * 调用后端 POST /api/session/verify-token
+     * 包含 5 秒超时，超时后抛出错误
+     */
+    async function verifyScanToken(token) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/session/verify-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+          signal: controller.signal,
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          const msg = data?.message || `请求失败 (HTTP ${res.status})`;
+          throw new Error(typeof msg === 'string' ? msg : '请求失败');
+        }
+        return data;
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          throw new Error('网络请求超时，请检查后端服务是否启动');
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    // —— 主表单提交：调用后端 /api/session/start ——
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+      setLoading(true);
+
+      const payload = {
+        patient_id: document.getElementById('taskNo').value,
+        department: '老年医学科',
+        consent_given: true,
+      };
+
+      try {
+        const session = await startSession(payload);
+        // 打印符合项目惯例的日志
+        console.log(`[LANTAO] 会话已创建，session_id=${session.session_id}`);
+        showSuccess(`核验成功！会话已创建：${session.session_id}`);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    /**
+     * 调用后端 POST /api/session/start
+     * 包含 5 秒超时，超时后抛出错误（不自动降级，因该接口必须成功才能继续）
+     */
+    async function startSession(payload) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/session/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          const msg = data?.message || data?.detail?.message || data?.detail || `请求失败 (HTTP ${res.status})`;
+          throw new Error(typeof msg === 'string' ? msg : '请求失败');
+        }
+        return data;
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          throw new Error('网络请求超时，请检查后端服务是否启动');
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      submitText.textContent = loading ? '正在核验…' : '核验并进入';
+    }
+
+    function setScanLoading(loading) {
+      scanSubmitBtn.disabled = loading;
+      scanSubmitText.textContent = loading ? '正在核验…' : '核验扫码令牌';
+    }
+
+    function showError(msg) {
+      errorBox.className = 'cga-alert cga-alert--error';
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function hideError() {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
+
+    function showSuccess(msg) {
+      errorBox.className = 'cga-alert cga-alert--success';
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
